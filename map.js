@@ -34,7 +34,7 @@ map.on('load', function () {
     map.addSource('tract', {
         'type': 'geojson',
         'data':
-            'Resources/Data/tract.geojson'
+            'Resources/Data/tract.json'
     });
 
     map.addLayer({
