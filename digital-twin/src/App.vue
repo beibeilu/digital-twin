@@ -1,0 +1,249 @@
+<template>
+	<div id="app">
+
+		<mapbox
+				id="map"
+				:access-token="accessToken"
+				:map-options="mapOptions"
+				@map-load="onLoadMap"
+				@map-click="onClickMap"
+				@mousemove="onMousemoveMap"
+		/>
+
+		<!-- an element called 'info' -->
+		<div id='info'></div>
+
+		<div class='map-overlay' id='features'>
+			<h2>Census Tract</h2>
+			<div id='pd'>
+				<h3><strong>{{ areaName }}</strong></h3>
+				<p>{{ geoId }}</p>
+			</div>
+		</div>
+
+		<div class='map-overlay' id='legend'></div>
+	</div>
+
+
+</template>
+
+<script>
+	/* eslint-disable vue/no-unused-components  */
+	/* eslint-disable no-unused-vars */
+	import data from '../public/Resources/Data/tract.json'
+	import Mapbox from 'mapbox-gl-vue'
+
+	let mapObj;
+	export default {
+		name: 'App',
+		components: {
+			Mapbox
+		},
+		data(){
+			return {
+
+				accessToken: "pk.eyJ1IjoieGJsdXgiLCJhIjoiY2tmc2w0MXJiMG81ZDJ5bndvMGNrajR0aSJ9.D7C_-vLYzalyoZq_974skA", // your access token. Needed if you using Mapbox maps
+				mapOptions: {
+					style: "mapbox://styles/mapbox/light-v10",
+					zoom: 1,
+					maxBounds: [
+						// Source: New York City Census Tracts for 2010 US Census
+						[-74.34438,40.47392], // Southwest coordinates
+						[-73.68091,40.95147] // Northeast coordinates
+					],
+					center: [40.70578, -73.978187],
+				},
+				geoId: "",
+				areaName: "",
+				geoJsonSource: {id: "tract",...data, type:'geojson'},
+				geoJsonLayer_tract_fill: {
+					"id": "tract_fill",
+					"type": "fill",
+					"source": "tract",
+					"paint": {
+						'fill-color': ["rgba", 255, 40, 0, ["get", "shape_areaOPC"]],
+						// hover state is set here using a case expression
+						// if hover is false, then opacity should be 0.6
+						// if hover is true then opacity should be 1
+						'fill-opacity': 1
+					},
+				},
+				geoJsonLayer_tract_line: {
+					"id": "tract_line",
+					"type": "line",
+					"source": "tract",
+					"paint": {
+						"line-color": "#000",
+						"line-width": 0.5
+					},
+				}
+			}
+		},
+		created(){
+			let max = 0
+			let min = 0
+			for(let i in data.features) {
+				let number = parseFloat(data.features[i].properties.shape_area) || 0
+				data.features[i].properties.shape_area = number
+				max = Math.max(number, max)
+				min = Math.min(number, min)
+			}
+			for(let i in data.features) {
+				data.features[i].properties.shape_areaOPC = ((data.features[i].properties.shape_area - min) / (max - min))
+
+			}
+			var layers = ['0-1', '1-2', '2-3', '3-4', '4-5'];
+			var colors = ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'];
+			for (var i = 0; i < layers.length; i++) {
+				var layer = layers[i];
+				var color = colors[i];
+				var item = document.createElement('div');
+				var key = document.createElement('span');
+				key.className = 'legend-key';
+				key.style.backgroundColor = color;
+				var value = document.createElement('span');
+				value.innerHTML = layer;
+				item.appendChild(key);
+				item.appendChild(value);
+				// legend.appendChild(item);
+			}
+
+
+		},
+		methods: {
+			onLoadMap(map){
+				// in component
+				//
+				mapObj = map;
+
+				map.addSource('tract', {
+					'type': 'geojson',
+					'data': data
+				});
+				map.addLayer(this.geoJsonLayer_tract_fill);
+				map.addLayer(this.geoJsonLayer_tract_line);
+			},
+			onClickMap(map, e){
+
+				let event = e
+
+				let lng = event.lngLat.lng
+				let lat = event.lngLat.lat
+
+				console.log("clicked:", lng, lat)
+
+				document.getElementById('info').innerHTML = lng.toFixed(5) + "," + lat.toFixed(5) + '/n'
+
+				var tract = map.queryRenderedFeatures(event.point, {
+					layers: ['tract_fill']
+				});
+				// alert(tract[0].properties.GeoId)
+			},
+
+			onMousemoveMap(map, e){
+				let event = e
+				var tract = map.queryRenderedFeatures(event.point, {
+					layers: ['tract_fill']
+				});
+
+				if (tract.length > 0) {
+					this.geoId = tract[0].properties.GeoId
+					this.areaName = tract[0].properties.ntaname
+
+				} else {
+					this.geoId = "Move around!"
+
+				}
+			}
+		},
+
+	}
+</script>
+
+<style>
+	body, html {
+		margin: 0;
+		padding: 0;
+		font-family: monospace;
+	}
+
+	#map {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		width: 100%;
+	}
+
+	#info {
+		position: absolute;
+		top: 0;
+		right: 0;
+		margin: 10px 10px auto auto;    /* top right bottom left */
+		padding: 5px;
+		border: 2px solid #ddd;
+		border-radius: 5px;
+		font-size: 12px;
+		text-align: center;
+		color: #222;
+		background: #fff;
+	}
+
+	img {
+		width: 300px;
+	}
+
+	h2,
+	h3 {
+		margin: 10px;
+		font-size: 1.2em;
+	}
+
+	h3 {
+		font-size: 1em;
+	}
+
+	p {
+		font-size: 0.85em;
+		margin: 10px;
+		text-align: left;
+	}
+
+	/**
+	* Set rules for how the map overlays
+	* (information box and legend) will be displayed
+	* on the page. */
+	.map-overlay {
+		position: absolute;
+		bottom: 0;
+		right: 0;
+		background: rgba(255, 255, 255, 0.8);
+		margin-right: 20px;
+		font-family: Arial, sans-serif;
+		overflow: auto;
+		border-radius: 3px;
+	}
+
+	#features {
+		top: 0;
+		height: 100px;
+		margin-top: 20px;
+		width: 250px;
+	}
+
+	#legend {
+		padding: 10px;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+		line-height: 18px;
+		height: 150px;
+		margin-bottom: 40px;
+		width: 100px;
+	}
+
+	.legend-key {
+		display: inline-block;
+		border-radius: 20%;
+		width: 10px;
+		height: 10px;
+		margin-right: 5px;
+	}
+</style>
