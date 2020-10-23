@@ -32,12 +32,15 @@
 	/* eslint-disable no-unused-vars */
 	import data from '../public/Resources/Data/tract.json'
 	import Mapbox from 'mapbox-gl-vue'
+	import mapboxgl from 'mapbox-gl'
+	import PopupContent from './components/PopupContent.vue'
 
 	let mapObj;
 	export default {
 		name: 'App',
 		components: {
-			Mapbox
+			Mapbox,
+			PopupContent
 		},
 		data(){
 			return {
@@ -137,7 +140,28 @@
 				var tract = map.queryRenderedFeatures(event.point, {
 					layers: ['tract_fill']
 				});
-				// alert(tract[0].properties.GeoId)
+				let title = tract[0].properties.ntaname;
+				let coordinates = [lng, lat];
+				let description = tract[0].properties.GeoId;
+				let area = tract[0].properties.shape_area
+				//
+				// // Ensure that if the map is zoomed out such that multiple
+				// // copies of the feature are visible, the popup appears
+				// // over the copy being pointed to.
+				// while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+				// 	coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+				// }
+
+				new mapboxgl.Popup()
+					.setLngLat([lng, lat])
+					.setHTML('<div id="vue-popup-content"></div>')
+					.addTo(map);
+
+				new PopupContent({ propsData: { feature: {
+					title,description,coordinates,area
+				} },
+				}).$mount('#vue-popup-content')
+
 			},
 
 			onMousemoveMap(map, e){
