@@ -44,8 +44,8 @@
 		},
 		data(){
 			return {
-
-				accessToken: "pk.eyJ1IjoieGJsdXgiLCJhIjoiY2tmc2w0MXJiMG81ZDJ5bndvMGNrajR0aSJ9.D7C_-vLYzalyoZq_974skA", // your access token. Needed if you using Mapbox maps
+        // access token. Needed if you using Mapbox maps
+				accessToken: "pk.eyJ1IjoieGJsdXgiLCJhIjoiY2tmc2w0MXJiMG81ZDJ5bndvMGNrajR0aSJ9.D7C_-vLYzalyoZq_974skA",
 				mapOptions: {
 					style: "mapbox://styles/mapbox/light-v10",
 					zoom: 1,
@@ -110,8 +110,6 @@
 				item.appendChild(value);
 				// legend.appendChild(item);
 			}
-
-
 		},
 		methods: {
 			onLoadMap(map){
@@ -143,7 +141,7 @@
 				let title = tract[0].properties.ntaname;
 				let coordinates = [lng, lat];
 				let description = tract[0].properties.GeoId;
-				let area = tract[0].properties.shape_area
+				let area = tract[0].properties.shape_area;
 				//
 				// // Ensure that if the map is zoomed out such that multiple
 				// // copies of the feature are visible, the popup appears
