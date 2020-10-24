@@ -1,4 +1,40 @@
 ### Data Source
+
+#### Description
+Compared to census, ACS is an **estimated** characteristic distribution. 
+
+Other data available
+- [Coronavirus Pandemic related](https://www.census.gov/data/experimental-data-products/household-pulse-survey.html)
+
+
+**Comparable**
+
+Data are comparable when they do not overlap. 
+Year selected: starting from 2010 (survey questions changed afterward)
+
+
+
+https://www.census.gov/programs-surveys/acs/guidance/comparing-acs-data.html
+
+#### Explore API with: (HTML)
+Modify the year by 
+
+**Accuracy**
+- 1-Year 2010-2019
+- 5-Year 2010-2018
+
+https://api.census.gov/data.html
+
+https://api.census.gov/data/2010.html
+
+https://api.census.gov/data/2010/acs.html
+
+https://api.census.gov/data/2010/acs/acs1.html
+
+https://api.census.gov/data/2010/acs/acs5.html
+
+#### Explore Data with:
+
 `cd data-analysis/ACS playbook.ipynb`
 
 #### Location/Predicates
