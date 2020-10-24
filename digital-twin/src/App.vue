@@ -12,16 +12,28 @@
 
 		<!-- an element called 'info' -->
 		<div id='info'></div>
-
+		<div class="selectionBox">
+			<h2>Selection</h2>
+			<select v-model="currentField">
+				<option v-for="item of availableFields" :key="item">{{ item }}</option>
+			</select>
+		</div>
 		<div class='map-overlay' id='features'>
 			<h2>Census Tract</h2>
 			<div id='pd'>
 				<h3><strong>{{ areaName }}</strong></h3>
 				<p>{{ geoId }}</p>
 			</div>
+
 		</div>
 
-		<div class='map-overlay' id='legend'></div>
+		<div class='map-overlay' id='legend'>
+			<div v-for="item in legend" :key="item.name">
+				<span :style="item.colorString" class="legend-key"></span>
+				<span>{{ item.name }}</span>
+			</div>
+
+		</div>
 	</div>
 
 
@@ -44,7 +56,16 @@
 		},
 		data(){
 			return {
-        // access token. Needed if you using Mapbox maps
+				// Configuration
+				currentField: "shape_area", // Default Field
+				availableFields: ["shape_area","boro_ct2010"],
+				colorScheme: {
+					shape_area: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'], //Give the # of your desired interval
+					boro_ct2010: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A']
+				},
+
+
+				// access token. Needed if you using Mapbox maps
 				accessToken: "pk.eyJ1IjoieGJsdXgiLCJhIjoiY2tmc2w0MXJiMG81ZDJ5bndvMGNrajR0aSJ9.D7C_-vLYzalyoZq_974skA",
 				mapOptions: {
 					style: "mapbox://styles/mapbox/light-v10",
@@ -56,6 +77,7 @@
 					],
 					center: [40.70578, -73.978187],
 				},
+				legend: [],
 				geoId: "",
 				areaName: "",
 				geoJsonSource: {id: "tract",...data, type:'geojson'},
@@ -79,39 +101,76 @@
 						"line-color": "#000",
 						"line-width": 0.5
 					},
-				}
+				},
+
+				dataField: {},
+
+				layerLegendText: []
 			}
 		},
 		created(){
-			let max = 0
-			let min = 0
-			for(let i in data.features) {
-				let number = parseFloat(data.features[i].properties.shape_area) || 0
-				data.features[i].properties.shape_area = number
-				max = Math.max(number, max)
-				min = Math.min(number, min)
-			}
-			for(let i in data.features) {
-				data.features[i].properties.shape_areaOPC = ((data.features[i].properties.shape_area - min) / (max - min))
 
-			}
-			var layers = ['0-1', '1-2', '2-3', '3-4', '4-5'];
-			var colors = ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'];
-			for (var i = 0; i < layers.length; i++) {
-				var layer = layers[i];
-				var color = colors[i];
-				var item = document.createElement('div');
-				var key = document.createElement('span');
-				key.className = 'legend-key';
-				key.style.backgroundColor = color;
-				var value = document.createElement('span');
-				value.innerHTML = layer;
-				item.appendChild(key);
-				item.appendChild(value);
-				// legend.appendChild(item);
+			this.processData();
+			this.setField(this.currentField)
+
+		},
+		watch:{
+			currentField(newVal, oldVal){
+
+				this.switchLayer(newVal)
 			}
 		},
 		methods: {
+			processData(){
+				for(let item of this.availableFields){
+					this.dataField[item] = {
+						min: 0,
+						max: 0,
+						interval: []
+					}
+				}
+				for(let i in data.features) {
+					for(let item of this.availableFields){
+						let number = parseFloat(data.features[i].properties[item]) || 0;
+						data.features[i].properties[item] = number;
+						this.dataField[item].max = Math.max(number, this.dataField[item].max)
+						this.dataField[item].min = Math.min(number, this.dataField[item].min)
+					}
+
+				}
+				for(let i in this.dataField){
+
+					let interval = Math.ceil((this.dataField[i].max - this.dataField[i].min) / this.colorScheme[i].length)
+					for(let j in this.colorScheme[i]){
+						this.dataField[i].interval.push(interval * j)
+					}
+					this.dataField[i].interval.push(this.dataField[i].max + 1)
+				}
+			},
+			setField(id){
+				this.legend = [];
+				console.log(this.dataField[id].interval)
+				let fillColor = ['case']
+				for(let i = 0; i < this.dataField[id].interval.length - 1; i++){
+					this.legend.push({
+						name: `${~~this.dataField[id].interval[i]}-${~~this.dataField[id].interval[i+1]}`,
+						color: this.colorScheme[id][i],
+						colorString: `background-color: ${this.colorScheme[id][i]}`
+					})
+					fillColor.push(["all",[ ">=", ["get", id], this.dataField[id].interval[i]], [ "<", ["get", id], this.dataField[id].interval[i + 1]]])
+					fillColor.push(this.colorScheme[id][i])
+				}
+				fillColor.push("#000000")
+				this.geoJsonLayer_tract_fill.paint["fill-color"] = fillColor
+
+			},
+			switchLayer(id){
+				this.setField(id || this.currentField)
+				mapObj.removeLayer("tract_fill")
+				mapObj.removeLayer("tract_line")
+				mapObj.addLayer(this.geoJsonLayer_tract_fill);
+				mapObj.addLayer(this.geoJsonLayer_tract_line);
+			},
 			onLoadMap(map){
 				// in component
 				//
@@ -123,6 +182,7 @@
 				});
 				map.addLayer(this.geoJsonLayer_tract_fill);
 				map.addLayer(this.geoJsonLayer_tract_line);
+
 			},
 			onClickMap(map, e){
 
@@ -195,7 +255,17 @@
 		bottom: 0;
 		width: 100%;
 	}
+	.selectionBox {
+		position: absolute;
+		top: 0;
+		left: 0;
+		margin: 10px 10px auto auto;
+		height: 100px;
+		width: 200px;
+		color: #222;
+		background: #fff;
 
+	}
 	#info {
 		position: absolute;
 		top: 0;
