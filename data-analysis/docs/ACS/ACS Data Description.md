@@ -74,15 +74,16 @@ https://api.census.gov/data/2018/acs/acs5/profile/variables.html
 *income*
 
 ```
-DP03_0051E = total household income and benefits
+DP03_0051E = INCOME AND BENEFITS
 DP03_0052E - # DP03_0061E = income group by amount
-DP03_0062E = median household income
+DP03_0062E = Median Total households  
 ```
 
 *rent*
 ```
 DP04_0126E = Gross Rent
 DP04_0127E - DP04_0123E = Rent group by amount
-DP04_0134E = Median Rent
+DP04_0134E = Median Rent (Estimate!!GROSS RENT!!Occupied units paying rent!!Median (dollars))
 DP04_0135E = No rent paid
+DP04_0136E = Estimate!!GROSS RENT AS A PERCENTAGE OF HOUSEHOLD INCOME (GRAPI)!!Occupied units paying rent (excluding units where GRAPI cannot be computed)
 ```
