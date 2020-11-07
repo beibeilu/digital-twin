@@ -58,7 +58,8 @@
 		name: 'App',
 		components: {
 			Mapbox,
-			PopupContent
+			PopupContent,
+			ElSelect
 		},
 		data(){
 			return {
