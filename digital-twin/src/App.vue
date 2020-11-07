@@ -42,7 +42,8 @@
 <script>
 	/* eslint-disable vue/no-unused-components  */
 	/* eslint-disable no-unused-vars */
-	import data from '../public/Resources/Data/tract.json'
+
+	import data from '../public/Resources/Data/geo_median_income.json'
 	import Mapbox from 'mapbox-gl-vue'
 	import mapboxgl from 'mapbox-gl'
 	import PopupContent from './components/PopupContent.vue'
@@ -57,11 +58,28 @@
 		data(){
 			return {
 				// Configuration
-				currentField: "shape_area", // Default Field
-				availableFields: ["shape_area","boro_ct2010"],
+				currentField: "medium_income_2010", // Default Field
+				availableFields: [
+					"medium_income_2010",
+					"medium_income_2011",
+					"medium_income_2012",
+					"medium_income_2013",
+					"medium_income_2014",
+					"medium_income_2015",
+					"medium_income_2016",
+					"medium_income_2017",
+					"medium_income_2018",
+				],
 				colorScheme: {
-					shape_area: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'], //Give the # of your desired interval
-					boro_ct2010: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A']
+					medium_income_2010: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'], //Give the # of your desired interval
+					medium_income_2011: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'],
+					medium_income_2012: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'], //Give the # of your desired interval
+					medium_income_2013: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'],
+					medium_income_2014: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'], //Give the # of your desired interval
+					medium_income_2015: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'],
+					medium_income_2016: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'], //Give the # of your desired interval
+					medium_income_2017: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'],
+					medium_income_2018: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'], //Give the # of your desired interval
 				},
 
 
@@ -86,7 +104,7 @@
 					"type": "fill",
 					"source": "tract",
 					"paint": {
-						'fill-color': ["rgba", 255, 40, 0, ["get", "shape_areaOPC"]],
+						'fill-color': ["rgba", 255, 40, 0, 1],
 						// hover state is set here using a case expression
 						// if hover is false, then opacity should be 0.6
 						// if hover is true then opacity should be 1
@@ -139,7 +157,7 @@
 
 				}
 				for(let i in this.dataField){
-
+					this.dataField[i].min = this.dataField[i].min < 0 ? 0 : this.dataField[i].min
 					let interval = Math.ceil((this.dataField[i].max - this.dataField[i].min) / this.colorScheme[i].length)
 					for(let j in this.colorScheme[i]){
 						this.dataField[i].interval.push(interval * j)
@@ -149,7 +167,7 @@
 			},
 			setField(id){
 				this.legend = [];
-				console.log(this.dataField[id].interval)
+				console.log(this.dataField)
 				let fillColor = ['case']
 				for(let i = 0; i < this.dataField[id].interval.length - 1; i++){
 					this.legend.push({
@@ -182,7 +200,7 @@
 				});
 				map.addLayer(this.geoJsonLayer_tract_fill);
 				map.addLayer(this.geoJsonLayer_tract_line);
-
+				console.log(map)
 			},
 			onClickMap(map, e){
 
@@ -198,10 +216,10 @@
 				var tract = map.queryRenderedFeatures(event.point, {
 					layers: ['tract_fill']
 				});
-				let title = tract[0].properties.ntaname;
+				let title = tract[0].properties.nta_name;
 				let coordinates = [lng, lat];
-				let description = tract[0].properties.GeoId;
-				let area = tract[0].properties.shape_area;
+				let description = tract[0].properties.GEO_ID;
+				let area = 0;
 				//
 				// // Ensure that if the map is zoomed out such that multiple
 				// // copies of the feature are visible, the popup appears
@@ -229,8 +247,8 @@
 				});
 
 				if (tract.length > 0) {
-					this.geoId = tract[0].properties.GeoId
-					this.areaName = tract[0].properties.ntaname
+					this.geoId = tract[0].properties.GEO_ID
+					this.areaName = tract[0].properties.nta_name
 
 				} else {
 					this.geoId = "Move around!"

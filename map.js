@@ -34,7 +34,8 @@ map.on('load', function () {
     map.addSource('tract', {
         'type': 'geojson',
         'data':
-            'Resources/Data/tract.json'
+            // 'digital-twin/public/Resources/Data/geo_nyc_zipcode.geojson'
+        'digital-twin/public/Resources/Data/tract.json'
     });
 
     map.addLayer({
@@ -97,13 +98,13 @@ for (var i = 0; i < layers.length; i++) {
 // });
 //
 map.on('mousemove', function(e) {
-    var tract = map.queryRenderedFeatures(e.point, {
-        layers: ['tract_fill']
-    });
-
-    if (tract.length > 0) {
-        document.getElementById('pd').innerHTML = '<h3><strong>' + tract[0].properties.ntaname + '</strong></h3><p>' + tract[0].properties.GeoId + '</p>';
-    } else {
-        document.getElementById('pd').innerHTML = '<p>Move around!</p>';
-    }
+    // var tract = map.queryRenderedFeatures(e.point, {
+    //     layers: ['tract_fill']
+    // });
+    //
+    // if (tract.length > 0) {
+    //     document.getElementById('pd').innerHTML = '<h3><strong>' + tract[0].properties.ntaname + '</strong></h3><p>' + tract[0].properties.GeoId + '</p>';
+    // } else {
+    //     document.getElementById('pd').innerHTML = '<p>Move around!</p>';
+    // }
 });
