@@ -14,9 +14,15 @@
 		<div id='info'></div>
 		<div class="selectionBox">
 			<h2>Selection</h2>
-			<select v-model="currentField">
-				<option v-for="item of availableFields" :key="item">{{ item }}</option>
-			</select>
+			<el-select v-model="currentField" placeholder="Select">
+				<el-option
+						v-for="item of availableFields"
+						:key="item"
+						:label="item"
+						:value="item">
+				</el-option>
+			</el-select>
+
 		</div>
 		<div class='map-overlay' id='features'>
 			<h2>Census Tract</h2>
@@ -46,7 +52,7 @@
 	import Mapbox from 'mapbox-gl-vue'
 	import mapboxgl from 'mapbox-gl'
 	import PopupContent from './components/PopupContent.vue'
-
+	import { ElSelect } from 'element-ui'
 	let mapObj;
 	export default {
 		name: 'App',
