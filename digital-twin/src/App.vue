@@ -47,7 +47,7 @@
 
 		</div>
 
-		<div class='map-overlay' id='legend'>
+		<div class='map-overlay bottom' id='legend' style="width: 150px">
 			<div v-for="item in legend" :key="item.name">
 				<span :style="item.colorString" class="legend-key"></span>
 				<span>{{ item.name }}</span>
@@ -150,7 +150,7 @@
 				// Stepping
 				currentSliderValue: 2010,
 				minxSliderValue: 2010,
-				maxSliderValue: 2019,
+				maxSliderValue: 2018,
 				sliderStep: 1
 			}
 		},
@@ -368,7 +368,9 @@
 		overflow: auto;
 		border-radius: 3px;
 	}
-
+	.map-overlay.bottom {
+		bottom: 0
+	}
 	#features {
 		top: 0;
 
@@ -380,9 +382,7 @@
 		padding: 10px;
 		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 		line-height: 18px;
-		height: 150px;
 		margin-bottom: 40px;
-		width: 100px;
 	}
 
 	.legend-key {
