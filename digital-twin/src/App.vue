@@ -1,3 +1,6 @@
+<!--Chroma - Color map library-->
+<!--https://github.com/gka/chroma.js-->
+<!--https://element.eleme.cn/2.0/#/zh-CN/component/slider-->
 <template>
 	<div id="app">
 
@@ -28,7 +31,8 @@
 			<h2>Census Tract</h2>
 			<div id='pd'>
 				<h3><strong>{{ areaName }}</strong></h3>
-				<p>{{ geoId }}</p>
+<!--				<p>{{ geoid }}</p>-->
+        <p>{{ tractName }}</p>
 			</div>
 
 		</div>
@@ -48,7 +52,7 @@
 <script>
 	/* eslint-disable vue/no-unused-components  */
 	/* eslint-disable no-unused-vars */
-	import data from '../public/Resources/Data/tract.json'
+	import data from '../public/Resources/Data/geo_median_income.json'
 	import Mapbox from 'mapbox-gl-vue'
 	import mapboxgl from 'mapbox-gl'
 	import PopupContent from './components/PopupContent.vue'
@@ -64,11 +68,11 @@
 		data(){
 			return {
 				// Configuration
-				currentField: "shape_area", // Default Field
-				availableFields: ["shape_area","boro_ct2010"],
+				currentField: "medium_income_2010", // Default Field
+				availableFields: ["medium_income_2010","medium_income_2011"],
 				colorScheme: {
-					shape_area: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'], //Give the # of your desired interval
-					boro_ct2010: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A']
+          medium_income_2010: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'], //Give the # of your desired interval
+          medium_income_2011: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A']
 				},
 
 
@@ -85,8 +89,9 @@
 					center: [40.70578, -73.978187],
 				},
 				legend: [],
-				geoId: "",
+				geoid: "",
 				areaName: "",
+        tractName: "",
 				geoJsonSource: {id: "tract",...data, type:'geojson'},
 				geoJsonLayer_tract_fill: {
 					"id": "tract_fill",
@@ -205,9 +210,9 @@
 				var tract = map.queryRenderedFeatures(event.point, {
 					layers: ['tract_fill']
 				});
-				let title = tract[0].properties.ntaname;
+				let title = tract[0].properties.nta_name;
 				let coordinates = [lng, lat];
-				let description = tract[0].properties.GeoId;
+				let description = tract[0].properties.GEO_ID;
 				let area = tract[0].properties.shape_area;
 				//
 				// // Ensure that if the map is zoomed out such that multiple
@@ -236,11 +241,12 @@
 				});
 
 				if (tract.length > 0) {
-					this.geoId = tract[0].properties.GeoId
-					this.areaName = tract[0].properties.ntaname
+					this.geoid = tract[0].properties.GEO_ID
+					this.areaName = tract[0].properties.nta_name
+          this.tractName = tract[0].properties.NAME
 
 				} else {
-					this.geoId = "Move around!"
+					this.geoid = "Move around!"
 
 				}
 			}
