@@ -16,16 +16,26 @@
 		<!-- an element called 'info' -->
 		<div id='info'></div>
 		<div class="selectionBox">
-			<h2>Selection</h2>
-			<el-select v-model="currentField" placeholder="Select">
-				<el-option
-						v-for="item of availableFields"
-						:key="item"
-						:label="item"
-						:value="item">
-				</el-option>
-			</el-select>
+			<h2>Income Selection</h2>
+<!--			<el-select v-model="currentField" placeholder="Select">-->
+<!--				<el-option-->
+<!--						v-for="item of availableFields"-->
+<!--						:key="item"-->
+<!--						:label="item"-->
+<!--						:value="item">-->
+<!--				</el-option>-->
+<!--			</el-select>-->
+			<span class="demonstration" style="font-size: 10px;padding-left:10px">Medium Income: {{ currentSliderValue }}</span>
+			<div class="block" style="padding-left: 15px;padding-right: 15px">
 
+				<el-slider
+						v-model="currentSliderValue"
+						:step="sliderStep"
+						:min="minxSliderValue"
+						:max="maxSliderValue"
+						show-stops>
+				</el-slider>
+			</div>
 		</div>
 		<div class='map-overlay' id='features'>
 			<h2>Census Tract</h2>
@@ -56,23 +66,40 @@
 	import Mapbox from 'mapbox-gl-vue'
 	import mapboxgl from 'mapbox-gl'
 	import PopupContent from './components/PopupContent.vue'
-	import { ElSelect } from 'element-ui'
+	import { ElSelect, ELSlider } from 'element-ui'
 	let mapObj;
 	export default {
 		name: 'App',
 		components: {
 			Mapbox,
 			PopupContent,
-			ElSelect
+
 		},
 		data(){
 			return {
 				// Configuration
 				currentField: "medium_income_2010", // Default Field
-				availableFields: ["medium_income_2010","medium_income_2011"],
+				availableFields: [
+					"medium_income_2010",
+					"medium_income_2011",
+					"medium_income_2012",
+					"medium_income_2013",
+					"medium_income_2014",
+					"medium_income_2015",
+					"medium_income_2016",
+					"medium_income_2017",
+					"medium_income_2018",
+				],
 				colorScheme: {
-          medium_income_2010: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'], //Give the # of your desired interval
-          medium_income_2011: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A']
+					medium_income_2010: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'],
+					medium_income_2011: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'],
+					medium_income_2012: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'],
+					medium_income_2013: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'],
+					medium_income_2014: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'],
+					medium_income_2015: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'],
+					medium_income_2016: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'],
+					medium_income_2017: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'],
+					medium_income_2018: ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A'],
 				},
 
 
@@ -91,7 +118,7 @@
 				legend: [],
 				geoid: "",
 				areaName: "",
-        tractName: "",
+                tractName: "",
 				geoJsonSource: {id: "tract",...data, type:'geojson'},
 				geoJsonLayer_tract_fill: {
 					"id": "tract_fill",
@@ -117,7 +144,14 @@
 
 				dataField: {},
 
-				layerLegendText: []
+				layerLegendText: [],
+
+
+				// Stepping
+				currentSliderValue: 2010,
+				minxSliderValue: 2010,
+				maxSliderValue: 2019,
+				sliderStep: 1
 			}
 		},
 		created(){
@@ -130,7 +164,11 @@
 			currentField(newVal, oldVal){
 
 				this.switchLayer(newVal)
-			}
+			},
+			currentSliderValue(newVal, oldVal){
+
+				this.currentField = `medium_income_${newVal}`
+			},
 		},
 		methods: {
 			processData(){
@@ -147,6 +185,7 @@
 						data.features[i].properties[item] = number;
 						this.dataField[item].max = Math.max(number, this.dataField[item].max)
 						this.dataField[item].min = Math.min(number, this.dataField[item].min)
+						this.dataField[item].min = this.dataField[item].min < 0 ? 0 : this.dataField[item].min
 					}
 
 				}
@@ -273,7 +312,7 @@
 		top: 0;
 		left: 0;
 		margin: 10px 10px auto auto;
-		height: 100px;
+
 		width: 200px;
 		color: #222;
 		background: #fff;
@@ -296,11 +335,14 @@
 	img {
 		width: 300px;
 	}
-
+	span {
+		font-family: "Open Sans";
+	}
 	h2,
 	h3 {
 		margin: 10px;
 		font-size: 1.2em;
+		font-family: "Open Sans";
 	}
 
 	h3 {
@@ -319,7 +361,6 @@
 	* on the page. */
 	.map-overlay {
 		position: absolute;
-		bottom: 0;
 		right: 0;
 		background: rgba(255, 255, 255, 0.8);
 		margin-right: 20px;
@@ -330,7 +371,7 @@
 
 	#features {
 		top: 0;
-		height: 100px;
+
 		margin-top: 20px;
 		width: 250px;
 	}
